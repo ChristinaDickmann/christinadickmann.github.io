@@ -1,0 +1,22 @@
+h1, h2 {
+	font-family: Arial;
+	font-size: 1.2em;
+	color: black;
+	margin-top: 3em;
+}
+
+table, th, td, tr {
+	border-collapse: collapse;
+}
+th, td{
+	text-align: middle;
+	font-weight: bold;
+}
+
+body {
+	margin-left: 5em;
+}
+
+table {
+	margin-top: 8em;
+}
