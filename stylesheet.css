@@ -1,16 +1,15 @@
-h1, h2 {
+h1{
 	font-family: Arial;
-	font-size: 1.2em;
+	font-size: 2em;
 	color: black;
-	margin-top: 3em;
+	margin-top: 1em;
 }
 
 table, th, td, tr {
+    border: 1px solid black;
 	border-collapse: collapse;
-}
-th, td{
-	text-align: middle;
-	font-weight: bold;
+	font-family: Arial;
+	background-color: #fefefe;
 }
 
 body {
@@ -18,5 +17,63 @@ body {
 }
 
 table {
-	margin-top: 8em;
+	margin-top: 2em;
+}
+
+div {
+	font-family: Arial;
+}
+
+#cat_0 {
+	width: 662px;
+	height: 860px;
+	background: url(images/cat_spritesheet.png) 663px 0;
+}
+
+#cat_1 {
+	width: 662px;
+	height: 860px;
+	background: url(images/cat_spritesheet.png) 0 860px;
+}
+
+#cat_2 {
+	width: 662px;
+	height: 860px;
+	background: url(images/cat_spritesheet.png) 1326px 860px;
+}
+
+#cat_3 {
+	width: 662px;
+	height: 860px;
+	background: url(images/cat_spritesheet.png) 0 860px;
+}
+
+#cat_4 {
+	width: 662px;
+	height: 860px;
+	background: url(images/cat_spritesheet.png) 663px 0;
+}
+
+#cat_5 {
+	width: 662px;
+	height: 860px;
+	background: url(images/cat_spritesheet.png) 1326px 0;
+}
+
+#cat_6 {
+	width: 662px;
+	height: 860px;
+	background: url(images/cat_spritesheet.png) 0 0;
+}
+
+#cat_7 {
+	width: 662px;
+	height: 860px;
+	background: url(images/cat_spritesheet.png) 1326px 0;
+}
+
+.image {
+	background: url(images/cat_spritesheet.png) 663px 861px;
+	width: 662px;
+	height: 860px;
 }

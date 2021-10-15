@@ -4,7 +4,7 @@ catCounter = 0;
 rotating = false;
 catRotating = false;
 var turnDiscConstantly = setInterval(changeSourceContinuous, 100);
-var turnCatConstantly = setInterval(changeCatSourceContinous, 200);
+var turnCatConstantly = setInterval(changeCatSourceContinous, 140);
 
 
 window.onkeydown = function(evt){
@@ -32,15 +32,6 @@ window.onkeydown = function(evt){
 	}
 };
 
-function loadImage(filename) {
-	var imageObj = new Image();
-	imageObj.src = "images/" + filename;
-	imageObj.onload = function() {
-		var img = document.getElementById('scheibe');
-		img.setAttribute('src', this.src);
-	};
-};
-
 function changeSource(angle) {
 	var img = document.getElementById('scheibe');
 	img.setAttribute('src', "images/schallplatte" + angle + ".png");
@@ -56,14 +47,17 @@ function changeSourceContinuous(){
 };
 
 function changeCatSource(state) {
-	var img = document.getElementById('katze');
-	img.setAttribute('src', "images/cat" + state + ".png");
+    var lastState = state - 1;
+	if (state == 0)
+		lastState = 7;
+	var img = document.getElementById('cat_' + lastState);
+	img.setAttribute('id', "cat_" + state);
 };
 
 function changeCatSourceContinous(){
 	if (catRotating) {
 		catCounter += 1;
-		if (catCounter == 4)
+		if (catCounter == 8)
 			catCounter = 0;
 		changeCatSource(catCounter);
 	}
