@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="Christina Dickmann">
+    <meta name="description" content="Bearbeitung der Einsendeaufgabe 2 im Modul GVT im Master Medieninformatik der HS Emden/Leer.">
+    <link rel="stylesheet" href="stylesheet.css">
+    <title>Christina Dickmann - ESA 2</title>
+</head>
+<body>
+    <h1>Christina Dickmann - ESA 2</h1>            
+        <canvas id="canvas" width="500" height="500"></canvas>
+        <script>
+            // Get the WebGL context.
+            var canvas = document.getElementById('canvas');
+            var gl = canvas.getContext('experimental-webgl');
+
+            // Pipeline setup.
+            gl.clearColor(1, 1, 1, 1);
+            // Backface culling.
+            gl.frontFace(gl.CCW);
+            gl.enable(gl.CULL_FACE);
+            gl.cullFace(gl.BACK);
+            //gl.cullFace(gl.FRONT);
+
+            // Compile vertex shader.
+            var vsSource = 'attribute vec2 pos;'+
+                'void main(){ gl_Position = vec4(pos.x * 0.1 -0.89, pos.y * 0.1 -0.5, 0, 1); }';
+            var vs = gl.createShader(gl.VERTEX_SHADER);
+            gl.shaderSource(vs, vsSource);
+            gl.compileShader(vs);
+
+            // Compile fragment shader.
+            fsSource =  'void main() { gl_FragColor = vec4(0,0,0,1); }';
+            var fs = gl.createShader(gl.FRAGMENT_SHADER);
+            gl.shaderSource(fs, fsSource);
+            gl.compileShader(fs);
+
+            // Link shader together into a program.
+            var prog = gl.createProgram();
+            gl.attachShader(prog, vs);
+            gl.attachShader(prog, fs);
+            gl.linkProgram(prog);
+            gl.useProgram(prog);
+
+            //Vertex data for diamond
+            var diamond = new Float32Array([
+                4,12, 8,12, 12,12, //0-2
+                3.25,11.25, 5.5,10.9, 10.5,10.9, 12.75,11.25, //3-6
+                0,8, 0.5,7.95, 2.5,7.8, 5,7.7, 8,7.6, 11,7.7, 13.5,7.8, 15.5,7.95, 16,8, //7-15
+                5,3, 7.25,2, 8.75,2, 11,3, //16-19
+                8,0, //20
+                8,-0.2, 7.6,0, 8.4,0, //31-33, Kreuzchen
+            ]);
+
+            // Index data for diamond
+            var indicesDiamond = new Uint16Array([ 
+                0,1, 1,2,
+                3,0, 0,4, 4,1, 1,5, 5,2, 2,6,
+                6,5, 5,4, 4,3,
+                3,7, 3,8, 3,9, 4,9, 4,10, 4,11, 5,11, 5,12, 5,13, 6,13, 6,14, 6,15,
+                7,8, 8,9, 9,10, 10,11, 11,12, 12,13, 13,14, 14,15,
+                7,16, 8,16, 9,16, 9,17, 10,17, 11,17, 11,18, 12,18, 13,18, 13,19, 14,19, 15,19,
+                16,20, 17,20, 18,20, 19,20,
+                20,21, 20,22, 20,23
+            ]);
+
+            // Setup vertex buffer object.
+            var vbo = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+            gl.bufferData(gl.ARRAY_BUFFER, diamond, gl.STATIC_DRAW);
+
+            // Connect vertex buffer to attribute variable.
+            var posAttrib = gl.getAttribLocation(prog, 'pos');
+            gl.vertexAttribPointer(posAttrib, 2, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(posAttrib);
+
+            // Setup index buffer object.
+            var ibo = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesDiamond, 
+                gl.STATIC_DRAW);
+            ibo.numberOfElements = indicesDiamond.length;
+
+            // Clear framebuffer and render primitives.
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawElements(gl.LINES, ibo.numberOfElements, gl.UNSIGNED_SHORT, 0);
+
+            //Vertex data for box
+            var box = new Float32Array([
+                -1,-1, 17,-1, 2,1, 14,1, 7,1, 9,1, //0-5, obere Boxfläche
+                -1,-5, 17,-5, -1,13, 17,13, //6-9, senkrechte Boxstriche vorne
+                2,6, 14,6, 2,10, 14,10, 2,11, 14,11, 3,11, 13,11 //10-17, Boxrückwand
+            ]);
+
+            //Index data for box
+            var indicesBox = new Uint16Array([
+                0,1, 0,2, 1,3, 2,4, 3,5,
+                0,6, 1,7, 0,8, 1,9, 8,9,
+                2,10, 3,11, 12,14, 13,15, 8,14, 9,15, 14,16, 15,17
+            ]);
+
+            gl.bufferData(gl.ARRAY_BUFFER, box, gl.STATIC_DRAW);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesBox, gl.STATIC_DRAW);
+            ibo.numberOfElementsBox = indicesBox.length;
+            gl.drawElements(gl.LINES, ibo.numberOfElementsBox, gl.UNSIGNED_SHORT, 0);
+        </script>
+</body>
+</html>
