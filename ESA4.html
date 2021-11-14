@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="Christina Dickmann">
+    <meta name="description" content="Bearbeitung der Einsendeaufgabe 4 im Modul GVT im Master Medieninformatik der HS Emden/Leer.">
+    <link rel="stylesheet" href="stylesheetEsa4.css">
+    <title>Christina Dickmann - ESA 4</title>
+</head>
+<body>
+    <h1>Christina Dickmann - ESA 4</h1>
+        <canvas id="canvas" width="700" height="700"></canvas>
+        <div>
+        <h3>Goldener Ring mit einem Rubin</h3>
+        <p><h4>Ring</h4>
+            Ring erstellt aus einem antisymmetrischen Torus: <a href="http://www.3d-meier.de/tut3/Seite59.html">http://www.3d-meier.de/tut3/Seite59.html</a></br>
+            Die Vertices des Rings sind nach Berechnung durch die Gleichungen mit dem Parameter 0.3 skaliert und in x- und y-Richtung verschoben worden.</br>
+            Der Ring ist mit einem leichten Farbverlauf im goldenen Bereich koloriert, die "Innenseite" (Die Seite, die auf einem Finger aufliegt) des Rings ist etwas heller, als die "Aussenseite".
+            <h4>Rubin</h4>Rubin gemacht aus einem Tropfen, mit einer niedrigen Unterteilung: <a href="http://www.3d-meier.de/tut3/Seite44.html">http://www.3d-meier.de/tut3/Seite44.html</a></br>
+            Die Vertices des Rubins sind nach Berechnung durch die Gleichungen mit dem Parameter 0.15 skaliert, in x- und y-Richtung verschoben, sowie an der x-Achse gespiegelt worden.</br>
+            Der Rubin ist mit einem leichten Farbverlauf im roten Bereich koloriert, die rechte Seite des Rubins erscheint etwas dunkler, als die linke Seite.
+        </p>
+        <h3>Abstrakter blauer Schmetterling (eigene Parametrisierung)</h3>
+        <p><h4>Genutzte Gleichungen</h4>
+            <strong>x:</strong> var x = v*Math.cos(2*v)*Math.cos(u)</br>
+            <strong>y:</strong> var y = v*Math.cos(2*v)*Math.sin(4*u)*Math.sin(2*u)</br>
+            <strong>z:</strong> var z = v*Math.sqrt(Math.sin(0.25*v))</br></br>
+            Die Vertices des Schmetterlings sind nach Berechnung durch die Gleichungen mit dem Parameter 0.045 skaliert und in x-Richtung verschoben worden.</br>
+            <p>Der Schmetterling ist nur aus der oben abgebildeten Position zu erkennen. Von der Seite sieht es so aus:</p>
+            <img src="Schmetterling_Seitenansicht.PNG">
+        </p>
+        </div>
+        <script>
+            // Get the WebGL context.
+            var canvas = document.getElementById('canvas');
+            var gl = canvas.getContext('experimental-webgl');
+
+            // Pipeline setup.
+            gl.clearColor(.95, .95, .95, 1);
+            // Backface culling.
+            gl.frontFace(gl.CCW);
+            // Depth(Z)-buffer
+            gl.enable(gl.DEPTH_TEST);
+            gl.depthFunc(gl.LEQUAL);
+            // Polygon offset of rastered Fragments.
+            gl.enable(gl.POLYGON_OFFSET_FILL);
+            gl.polygonOffset(1.0, 1.0);
+
+            // Compile vertex shader. 
+            var vsSource = '' + 
+                'attribute vec3 pos;' + 
+                'attribute vec4 col;' + 
+                'varying vec4 color;' + 
+                'void main(){' + 'color = col;' + 
+                'gl_Position = vec4(pos, 1);' +
+                '}';
+            var vs = gl.createShader(gl.VERTEX_SHADER);
+            gl.shaderSource(vs, vsSource);
+            gl.compileShader(vs);
+
+            // Compile fragment shader.
+            fsSource = 'precision mediump float;' + 
+                'varying vec4 color;' + 
+                'void main() {' + 
+                'gl_FragColor = color;' + 
+                '}';
+            var fs = gl.createShader(gl.FRAGMENT_SHADER);
+            gl.shaderSource(fs, fsSource);
+            gl.compileShader(fs);
+
+            // Link shader together into a program.
+            var prog = gl.createProgram();
+            gl.attachShader(prog, vs);
+            gl.attachShader(prog, fs);
+            gl.bindAttribLocation(prog, 0, "pos");
+            gl.linkProgram(prog);
+            gl.useProgram(prog);
+
+            // Create first object
+
+            // Vertex data.
+            // Positions, Index data.
+            var verticesTorus, colorsTorus, indicesLinesTorus, indicesTrisTorus;
+            // Fill the data arrays.
+            createVertexDataForTorus();
+
+            // Setup position vertex buffer object.
+            var vboPos = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vboPos);
+            gl.bufferData(gl.ARRAY_BUFFER, verticesTorus, gl.STATIC_DRAW);
+            // Bind vertex buffer to attribute variable.
+            var posAttrib = gl.getAttribLocation(prog, 'pos');
+            gl.vertexAttribPointer(posAttrib, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(posAttrib);
+
+            //Setup color vertex buffer object
+            var vboCol = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vboCol);
+            gl.bufferData(gl.ARRAY_BUFFER, colorsTorus, gl.STATIC_DRAW);
+            //Bind vertex buffer to attribute variable
+            var colAttrib = gl.getAttribLocation(prog, 'col');
+            gl.vertexAttribPointer(colAttrib, 4, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(colAttrib);
+
+            // Setup lines index buffer object.
+            var iboLines = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesLinesTorus, gl.STATIC_DRAW);
+            iboLines.numberOfElements = indicesLinesTorus.length;
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+            // Setup tris index buffer object.
+            var iboTris = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesTrisTorus, gl.STATIC_DRAW);
+            iboTris.numberOfElements = indicesTrisTorus.length;
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+            // Clear framebuffer and render primitives.
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+            // Setup rendering tris.
+            gl.vertexAttrib4f(colAttrib, 1, 0, 0, 1);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
+            gl.drawElements(gl.TRIANGLES, iboTris.numberOfElements, gl.UNSIGNED_SHORT, 0);
+
+            // Setup rendering lines.
+            gl.disableVertexAttribArray(colAttrib);
+            gl.vertexAttrib4f(colAttrib, 0, 0, 0, 1);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
+            gl.drawElements(gl.LINES, iboLines.numberOfElements, gl.UNSIGNED_SHORT, 0);
+
+            //Create Second object
+
+            // Vertex data.
+            // Positions, Colors, Index data.
+            var verticesDrop, colorsDrop, indicesLinesDrop, indicesTrisDrop;
+            // Fill the data arrays.
+            createVertexDataForDrop();
+
+            // Setup position vertex buffer object.
+            var vboPos = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vboPos);
+            gl.bufferData(gl.ARRAY_BUFFER, verticesDrop, gl.STATIC_DRAW);
+            // Bind vertex buffer to attribute variable.
+            var posAttrib = gl.getAttribLocation(prog, 'pos');
+            gl.vertexAttribPointer(posAttrib, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(posAttrib);
+
+            //Setup color vertex buffer object
+            var vboCol = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vboCol);
+            gl.bufferData(gl.ARRAY_BUFFER, colorsDrop, gl.STATIC_DRAW);
+            //Bind vertex buffer to attribute variable
+            var colAttrib = gl.getAttribLocation(prog, 'col');
+            gl.vertexAttribPointer(colAttrib, 4, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(colAttrib);
+
+            // Setup lines index buffer object.
+            var iboLines = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesLinesDrop, gl.STATIC_DRAW);
+            iboLines.numberOfElements = indicesLinesDrop.length;
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+            // Setup tris index buffer object.
+            var iboTris = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesTrisDrop, gl.STATIC_DRAW);
+            iboTris.numberOfElements = indicesTrisDrop.length;
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+            // Setup rendering tris.
+            gl.vertexAttrib4f(colAttrib, 1, 0, 0, 1);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
+            gl.drawElements(gl.TRIANGLES, iboTris.numberOfElements, gl.UNSIGNED_SHORT, 0);
+                
+            // Setup rendering lines.
+            gl.disableVertexAttribArray(colAttrib);
+            gl.vertexAttrib4f(colAttrib, 0, 0, 0, 1);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
+            gl.drawElements(gl.LINES, iboLines.numberOfElements, gl.UNSIGNED_SHORT, 0);
+
+            //Create Third object
+
+            // Vertex data.
+            // Positions, Colors, Index data.
+            var vertices, colors, indicesLines, indicesTris;
+            // Fill the data arrays.
+            createVertexData();
+
+            // Setup position vertex buffer object.
+            var vboPos = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vboPos);
+            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+            // Bind vertex buffer to attribute variable.
+            var posAttrib = gl.getAttribLocation(prog, 'pos');
+            gl.vertexAttribPointer(posAttrib, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(posAttrib);
+
+            //Setup color vertex buffer object
+            var vboCol = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vboCol);
+            gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
+            //Bind vertex buffer to attribute variable
+            var colAttrib = gl.getAttribLocation(prog, 'col');
+            gl.vertexAttribPointer(colAttrib, 4, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(colAttrib);
+
+            // Setup lines index buffer object.
+            var iboLines = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesLines, gl.STATIC_DRAW);
+            iboLines.numberOfElements = indicesLines.length;
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+            // Setup tris index buffer object.
+            var iboTris = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesTris, gl.STATIC_DRAW);
+            iboTris.numberOfElements = indicesTris.length;
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+
+            // Setup rendering tris.
+            gl.vertexAttrib4f(colAttrib, 1, 0, 0, 1);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
+            gl.drawElements(gl.TRIANGLES, iboTris.numberOfElements, gl.UNSIGNED_SHORT, 0);
+                
+            // Setup rendering lines.
+            gl.disableVertexAttribArray(colAttrib);
+            gl.vertexAttrib4f(colAttrib, 0, 0, 0, 1);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
+            gl.drawElements(gl.LINES, iboLines.numberOfElements, gl.UNSIGNED_SHORT, 0);
+
+
+            function createVertexDataForTorus(){
+                //http://www.3d-meier.de/tut3/Seite59.html
+                var n = 32;
+                var m = 10;
+                // Positions.
+                verticesTorus = new Float32Array(3 * (n+1) * (m+1));
+                // Index data.
+                indicesLinesTorus = new Uint16Array(2 * 2 * n * m);
+                indicesTrisTorus  = new Uint16Array(3 * 2 * n * m);
+                // Color data.
+                colorsTorus = new Float32Array(verticesTorus.length * 3);
+
+                var du = 2*Math.PI/n;
+                var dv = 2*Math.PI/m;
+                // Counter for entries in index array.
+                var iLines = 0;
+                var iTris = 0;
+                
+                for(var i=0, u=0; i <= n; i++, u += du) {
+
+                    for(var j=0, v=0; j <= m; j++, v += dv){
+
+                        var iVertex = i*(m+1) + j;
+                        var R = 1;
+                        var r = 0.09;
+                        var a = 1.4;
+                        var x = (R+r*Math.cos(v)*(a+Math.sin(u)))*Math.cos(u);
+                        var y = (R+r*Math.cos(v)*(a+Math.sin(u)))*Math.sin(u);
+                        var z = r*Math.sin(v)*(a+Math.sin(u));
+                        
+                        // Set vertex positions.
+                        verticesTorus[iVertex * 3] = 0.3*x-0.5;
+                        verticesTorus[iVertex * 3 + 1] = 0.3*y-0.2;
+                        verticesTorus[iVertex * 3 + 2] = 0.3*z;
+
+                        //Set Colors
+                        colorsTorus[iVertex * 4] = 238/255;
+                        colorsTorus[iVertex * 4 + 1] = 201/255;
+                        colorsTorus[iVertex * 4 + 2] = 0;
+                        colorsTorus[iVertex * 4 + 3] = 1;
+                        if (j>7)
+                        {
+                            colorsTorus[iVertex * 4] = 205/255;
+                            colorsTorus[iVertex * 4 + 1] = 173/255;
+                            colorsTorus[iVertex * 4 + 2] = 0;
+                            colorsTorus[iVertex * 4 + 3] = 1;
+                        }
+						
+						// Set index.
+                        if(j>0 && i>0){
+                            indicesLinesTorus[iLines++] = iVertex - 1;
+                            indicesLinesTorus[iLines++] = iVertex;
+                        }
+                        if(j>0 && i>0){
+                            indicesLinesTorus[iLines++] = iVertex - (m+1);                            
+                            indicesLinesTorus[iLines++] = iVertex;
+                        }
+						
+                        // Set index.
+                        // Two Triangles.
+                        if(j>0 && i>0){
+                            indicesTrisTorus[iTris++] = iVertex;
+                            indicesTrisTorus[iTris++] = iVertex - 1;
+                            indicesTrisTorus[iTris++] = iVertex - (m+1);
+                            //        
+                            indicesTrisTorus[iTris++] = iVertex - 1;
+                            indicesTrisTorus[iTris++] = iVertex - (m+1) - 1;
+                            indicesTrisTorus[iTris++] = iVertex - (m+1);    
+                        }
+                    }
+                }
+            }
+
+            function createVertexDataForDrop(){
+                //http://www.3d-meier.de/tut3/Seite44.html
+                var n = 4;
+                var m = 12;
+                // Positions.
+                verticesDrop = new Float32Array(3 * (n+1) * (m+1));
+                // Index data.
+                indicesLinesDrop = new Uint16Array(2 * 2 * n * m);
+                indicesTrisDrop  = new Uint16Array(3 * 2 * n * m);
+                colorsDrop = new Float32Array(verticesDrop.length * 3);
+
+                var du = Math.PI/n;
+                var dv = 2*Math.PI/m;
+                // Counter for entries in index array.
+                var iLines = 0;
+                var iTris = 0;
+
+                for(var i=0, u=0; i <= n; i++, u += du) {
+                    
+                    for(var j=0, v=0; j <= m; j++, v += dv){
+
+                        var iVertex = i*(m+1) + j;
+                        var a =0.8;
+                        var b = 2;
+
+                        var x = a*(b-Math.cos(u))*Math.sin(u)*Math.cos(v);
+                        var z = a*(b-Math.cos(u))*Math.sin(u)*Math.sin(v);
+                        var y = Math.cos(u);
+                        // Set vertex positions.
+                        verticesDrop[iVertex * 3] = 0.15*x-0.5;
+                        verticesDrop[iVertex * 3 + 1] = -0.15*y+0.29;
+                        verticesDrop[iVertex * 3 + 2] = -0.15*z;
+
+                        //Set Colors
+                            colorsDrop[iVertex * 4] = 238/255;
+                            colorsDrop[iVertex * 4 + 1] = 0;
+                            colorsDrop[iVertex * 4 + 2] = 0;
+                            colorsDrop[iVertex * 4 + 3] = 1;
+                        if(j<2)
+                            colorsDrop[iVertex * 4] = 205/255; 
+						
+						// Set index.
+                        if(j>0 && i>0){
+                            indicesLinesDrop[iLines++] = iVertex - 1;
+                            indicesLinesDrop[iLines++] = iVertex;
+                        }
+                        if(j>0 && i>0){
+                            indicesLinesDrop[iLines++] = iVertex - (m+1);                            
+                            indicesLinesDrop[iLines++] = iVertex;
+                        }
+						
+                        // Set index.
+                        // Two Triangles.
+                        if(j>0 && i>0){
+                            indicesTrisDrop[iTris++] = iVertex;
+                            indicesTrisDrop[iTris++] = iVertex - 1;
+                            indicesTrisDrop[iTris++] = iVertex - (m+1);
+                            //        
+                            indicesTrisDrop[iTris++] = iVertex - 1;
+                            indicesTrisDrop[iTris++] = iVertex - (m+1) - 1;
+                            indicesTrisDrop[iTris++] = iVertex - (m+1);    
+                        }
+                    }
+                }
+            }
+
+            function createVertexData(){
+                var n = 32;
+                var m = 32;
+                // Positions.
+                vertices = new Float32Array(3 * (n+1) * (m+1));
+                // Index data.
+                indicesLines = new Uint16Array(2 * 2 * n * m);
+                indicesTris  = new Uint16Array(3 * 2 * n * m);
+                // Color data.
+                colors = new Float32Array(vertices.length * 3);
+
+                var du = 1*Math.PI/n;
+                var dv = 3*Math.PI/m;
+                // Counter for entries in index array.
+                var iLines = 0;
+                var iTris = 0;
+                
+                for(var i=0, u=0; i <= n; i++, u += du) {
+                    
+                    for(var j=0, v=0; j <= m; j++, v += dv){
+
+                        var iVertex = i*(m+1) + j;
+
+                        var y = v*Math.cos(2*v)*Math.sin(4*u)*Math.sin(2*u);
+                        var x = v*Math.cos(2*v)*Math.cos(u);
+                        var z = v*Math.sqrt(Math.sin(0.25*v));
+
+                        // Set vertex positions.
+                        vertices[iVertex * 3] = 0.045*x + 0.5;
+                        vertices[iVertex * 3 + 1] = 0.045*y;
+                        vertices[iVertex * 3 + 2] = 0.045*z;
+
+                        //Set Colors
+                        if (j<n)
+                        {
+                            colors[iVertex * 4] = 135/255;
+                            colors[iVertex * 4 + 1] = 206/255;
+                            colors[iVertex * 4 + 2] = 255/255;
+                            colors[iVertex * 4 + 3] = 1;
+                        }
+                        if (j<n-6)
+                        {
+                            colors[iVertex * 4] = 170/255;
+                            colors[iVertex * 4 + 1] = 170/255;
+                            colors[iVertex * 4 + 2] = 255/255;
+                            colors[iVertex * 4 + 3] = 1;
+                        }
+						
+						// Set index.
+                        if(j>0 && i>0){
+                            indicesLines[iLines++] = iVertex - 1;
+                            indicesLines[iLines++] = iVertex;
+                        }
+                        if(j>0 && i>0){
+                            indicesLines[iLines++] = iVertex - (m+1);                            
+                            indicesLines[iLines++] = iVertex;
+                        }
+						
+                        // Set index.
+                        // Two Triangles.
+                        if(j>0 && i>0){
+                            indicesTris[iTris++] = iVertex;
+                            indicesTris[iTris++] = iVertex - 1;
+                            indicesTris[iTris++] = iVertex - (m+1);
+                            //        
+                            indicesTris[iTris++] = iVertex - 1;
+                            indicesTris[iTris++] = iVertex - (m+1) - 1;
+                            indicesTris[iTris++] = iVertex - (m+1);    
+                        }
+                    }
+                }
+            }
+
+        </script>
+</body>
+</html>
