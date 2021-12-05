@@ -2,8 +2,8 @@ var tropfen = ( function() {
 
 	function createVertexData(){
         //http://www.3d-meier.de/tut3/Seite44.html
-        var n = 4;
-        var m = 12;
+        var n = 36;
+        var m = 36;
 
         // Positions.
         this.vertices = new Float32Array(3 * (n+1) * (m+1));
@@ -38,9 +38,9 @@ var tropfen = ( function() {
                 var z = a*(b-Math.cos(u))*Math.sin(u)*Math.sin(v);
                 var y = Math.cos(u);
                 // Set vertex positions.
-                vertices[iVertex * 3] = 0.15*x-1.25;
-                vertices[iVertex * 3 + 1] = -0.15*y+0.8;
-                vertices[iVertex * 3 + 2] = -0.15*z;
+                vertices[iVertex * 3] = x;
+                vertices[iVertex * 3 + 1] = y;
+                vertices[iVertex * 3 + 2] = z;
 
                 // Calc and set normals.
 				var nx = Math.cos(u) * Math.cos(v);

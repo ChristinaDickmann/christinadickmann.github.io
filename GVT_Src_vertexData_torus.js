@@ -18,8 +18,8 @@ var torus = ( function() {
 
 		var du = 2 * Math.PI / n;
 		var dv = 2 * Math.PI / m;
-		var r = 0.25;
-		var R = 0.8;
+		var r = 0.1;
+		var R = 1.5;
 		// Counter for entries in index array.
 		var iLines = 0;
 		var iTris = 0;
@@ -31,9 +31,9 @@ var torus = ( function() {
 
 				var iVertex = i * (m + 1) + j;
 
-				var x = (R + r * Math.cos(u) ) * Math.cos(v);
+				var z = (R + r * Math.cos(u) ) * Math.cos(v);
 				var y = (R + r * Math.cos(u) ) * Math.sin(v);
-				var z = r * Math.sin(u);
+				var x = r * Math.sin(u);
 
 				// Set vertex positions.
 				vertices[iVertex * 3] = x;

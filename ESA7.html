@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8" />
+    <meta name="author" content="Christina Dickmann">
+    <meta name="description" content="Bearbeitung der Einsendeaufgabe 7 im Modul GVT im Master Medieninformatik der HS Emden/Leer.">
+    <link rel="stylesheet" href="stylesheetEsa7.css">
+    <title>ESA7 - Christina Dickmann</title>
+
+	<script src="ext/gl-matrix.js"></script>
+	<script src="GVT_Src_vertexData_sphere.js"></script>
+	<script src="GVT_Src_vertexData_torus.js"></script>
+	<script src="GVT_Src_vertexData_plane.js"></script>
+	<script src="Tropfen.js"></script>
+	<script src="ESA7.js"></script>
+	<script type="x-shader/x-vertex" id="vertexshader">
+		attribute vec3 aPosition;
+		attribute vec3 aNormal;
+
+		uniform mat4 uPMatrix;
+		uniform mat4 uMVMatrix;
+		uniform mat3 uNMatrix;
+		uniform vec4 uColor;
+
+		varying vec4 vColor;
+
+		void main(){
+			gl_Position = uPMatrix * uMVMatrix * vec4(aPosition, 1.0);
+			vec3 tNormal = uNMatrix * aNormal;
+
+			vColor = vec4(tNormal.z, tNormal.z, tNormal.z, 1.0);
+			vColor = uColor * (vColor + 1.0) / 2.0;
+		}
+	</script>
+	<script type="x-shader/x-fragment" id="fragmentshader">
+		precision mediump float;
+		varying vec4 vColor;
+
+		void main() {
+			gl_FragColor = vec4(gl_FragCoord.z, gl_FragCoord.z, gl_FragCoord.z, 1.0);
+		}
+	</script>
+</head>
+<body onload="app.start()">
+	<h1>Christina Dickmann - ESA 7, Atome im Regen</h1>
+	<canvas id="canvas" width="1000" height="600"></canvas>
+	<div>
+	<strong>Taste K:</strong> Sarten/Stoppen der Animation</br>
+	<strong>Pfeiltasten links/rechts:</strong> Bewegen der Kamera auf einer Kreisbahn um die y-Achse</br>
+	<strong>Pfeiltasten oben/unten:</strong> Bewegen der Kamera um die x-Achse</br>
+	<strong>Taste R/Shift+R:</strong> Radius der Kreisbahn einstellen</br>
+	<strong>Tasten W/S:</strong> Bewegen der Kamera relativ zur y-Achse</br>
+	<strong>Tasten A/D:</strong> Bewegen der Kamera relativ zur x-Achse</br>
+	<strong>Taste O/F/P:</strong> Umschalten der Ansicht von orthogonal auf Frustum auf perspektivisch</br>
+	<strong>Taste V/Shift+V:</strong> Field of View in perspektivischer Ansicht einstellen</br>
+	<strong>Taste B/Shift+B:</strong> Near Plane bei Frustum einstellen</br>
+	</div>
+</body>
