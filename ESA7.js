@@ -174,7 +174,7 @@ var app = ( function() {
 		var sc = 0.1;
 		for (var i = 0; i<20; i++)
 		{
-			var randomX = getRandomArbitrary(-5,5);
+			var randomX = getRandomArbitrary(-5,5); 
 			var randomY = getRandomArbitrary(-2,2);
 			var randomZ = getRandomArbitrary(-2,2);
 			createModel("tropfen", f, [0,0,0,0], [randomX,randomY,randomZ], [0,0,0], [sc*0.5,sc*2,sc*0.5]);
