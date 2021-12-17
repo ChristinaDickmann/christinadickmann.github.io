@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8" />
+    <meta name="author" content="Christina Dickmann">
+    <meta name="description" content="Bearbeitung der Einsendeaufgabe 8 im Modul GVT im Master Medieninformatik der HS Emden/Leer.">
+    <link rel="stylesheet" href="stylesheetEsa8.css">
+    <title>ESA8 - Christina Dickmann</title>
+
+	<script src="ext/gl-matrix.js"></script>
+	<script src="GVT_Src_vertexData_plane.js"></script>
+	<script src="AntisymmetrischerTorus.js"></script>
+	<script src="Tropfen.js"></script>
+	<script src="ESA8.js"></script>
+	<script type="x-shader/x-vertex" id="vertexshader">
+		attribute vec3 aPosition;
+		attribute vec3 aNormal;
+
+		uniform mat4 uPMatrix;
+		uniform mat4 uMVMatrix;
+		uniform mat3 uNMatrix;
+
+		varying vec3 vNormal;
+		varying vec4 vPosition;
+
+		void main(){
+			vec4 tPosition = uMVMatrix * vec4(aPosition, 1.0);
+			gl_Position = uPMatrix * tPosition;
+
+			vec3 tNormal = normalize(uNMatrix * aNormal);
+
+			vPosition = tPosition;
+			vNormal = tNormal;
+		}
+	</script>
+	<script type="x-shader/x-fragment" id="fragmentshader">
+		precision mediump float;
+
+		varying vec3 vNormal;
+		varying vec4 vPosition;
+
+		struct PhongMaterial {
+			vec3 ka;
+			vec3 kd;
+			vec3 ks;
+			float ke;
+		};
+		uniform PhongMaterial material;
+
+		//Ambient light.
+		uniform vec3 ambientLight;
+
+		//Pointlights.
+		const int MAX_LIGHT_SOURCES = 8;
+		struct LightSource {
+			bool isOn;
+			vec3 position;
+			vec3 color;
+		};
+		uniform LightSource light[MAX_LIGHT_SOURCES];
+
+		vec3 Toon(LightSource l, vec3 vNormal, vec3 vPosition) {
+			vec3 lightDir = normalize(l.position - vPosition);
+			float diff = dot(vNormal, lightDir);
+			vec3 diffuse = vec3(0);
+			if (diff > 0.75) {
+				diffuse = l.color * material.kd * 0.95;
+			}
+			if (diff > 0.5) {
+				diffuse = l.color * material.kd * 0.75;
+			}
+			else if (diff > 0.3) {
+				diffuse = l.color * material.kd * 0.5;
+			}
+			else {
+				diffuse = l.color * material.kd * 0.25;
+			}
+
+			return diffuse;
+		}
+
+		void main() {
+			vec3 result = material.ka * ambientLight;
+			vec3 vNormal = normalize(vNormal);
+			for(int i = 0; i <MAX_LIGHT_SOURCES; i++) {
+				if (light[i].isOn) {
+					result.rgb += Toon(light[i], vNormal, vPosition.xyz);
+				}
+			}
+
+			gl_FragColor = vec4(result.rgb, 1.0);
+		}
+	</script>
+</head>
+<body onload="app.start()">
+	<h1>Christina Dickmann - ESA 8</h1>
+	<h2><a href="ESA8_Phong.html">Phong Shader</a></h2>
+	<canvas id="canvas" width="1000" height="600"></canvas>
+	<div>
+	<strong>Taste L:</strong> Starten/Stoppen der Licht-Animation</br>
+	<strong>Pfeiltasten links/rechts:</strong> Bewegen der Kamera auf einer Kreisbahn um die y-Achse</br>
+	<strong>Pfeiltasten oben/unten:</strong> Bewegen der Kamera um die x-Achse</br>
+	<strong>Taste R/Shift+R:</strong> Radius der Kreisbahn einstellen</br>
+	<strong>Tasten W/S:</strong> Bewegen der Kamera relativ zur y-Achse</br>
+	<strong>Tasten A/D:</strong> Bewegen der Kamera relativ zur x-Achse</br>
+	<strong>Taste O/F/P:</strong> Umschalten der Ansicht von orthogonal auf Frustum auf perspektivisch</br>
+	<strong>Taste V/Shift+V:</strong> Field of View in perspektivischer Ansicht einstellen</br>
+	<strong>Taste B/Shift+B:</strong> Near Plane bei Frustum einstellen</br>
+	</div>
+</body>

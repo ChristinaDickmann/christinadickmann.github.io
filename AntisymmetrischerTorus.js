@@ -39,9 +39,9 @@ var atorus = ( function() {
                 var z = -r*Math.sin(v)*(a+Math.sin(u));
                         
                 // Set vertex positions.
-                vertices[iVertex * 3] = 0.3*x-1.25;
-                vertices[iVertex * 3 + 1] = 0.3*y+0.3;
-                vertices[iVertex * 3 + 2] = 0.3*z;
+                vertices[iVertex * 3] = x;
+                vertices[iVertex * 3 + 1] = y;
+                vertices[iVertex * 3 + 2] = z;
 
                 // Calc and set normals.
 				var nx = Math.cos(u) * Math.cos(v);
