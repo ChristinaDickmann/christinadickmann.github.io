@@ -401,6 +401,21 @@ var app = ( function() {
 				case('L'):
 					animateLights = !animateLights;
 					break;
+				case('1'): // one Light
+					illumination.light[0].isOn = true;
+					illumination.light[1].isOn = false;
+					illumination.light[2].isOn = false;
+					break;
+				case('2'): // two lights
+					illumination.light[0].isOn = true;
+					illumination.light[1].isOn = true;
+					illumination.light[2].isOn = false;
+					break;
+				case('3'): // three lights
+					illumination.light[0].isOn = true;
+					illumination.light[1].isOn = true;
+					illumination.light[2].isOn = true;
+					break;
 				case ('G'):
 					//interactiveModel.scale[0] *= 1 + sign * deltaScale;
 					//interactiveModel.scale[1] *= 1 - sign * deltaScale;
