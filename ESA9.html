@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8" />
+    <meta name="author" content="Christina Dickmann">
+    <meta name="description" content="Bearbeitung der Einsendeaufgabe 9 im Modul GVT im Master Medieninformatik der HS Emden/Leer.">
+    <link rel="stylesheet" href="stylesheetEsa9.css">
+    <title>ESA9 - Christina Dickmann</title>
+
+	<script src="ext/gl-matrix.js"></script>
+	<script src="GVT_Src_vertexData_torus.js"></script>
+	<script src="ESA9.js"></script>
+	<script type="x-shader/x-vertex" id="vertexshader">
+		attribute vec3 aPosition;
+		attribute vec3 aNormal;
+		attribute vec2 aTextureCoord;
+
+		uniform mat4 uPMatrix;
+		uniform mat4 uMVMatrix;
+		uniform mat3 uNMatrix;
+
+		varying vec3 vNormal;
+		varying vec4 vPosition;
+		varying vec2 vTextureCoord;
+
+		void main(){
+			// Calculate vertex position in eye coordinates. 
+			vec4 tPosition = uMVMatrix * vec4(aPosition, 1.0);
+			// Calculate projection.
+			gl_Position = uPMatrix * tPosition;
+			
+			vec3 tNormal = normalize(uNMatrix * aNormal);
+			vNormal = tNormal;
+			vPosition = tPosition;
+				
+			vTextureCoord = aTextureCoord;		
+		}
+	</script>
+	<script type="x-shader/x-fragment" id="fragmentshader">
+		precision mediump float;
+			
+		uniform sampler2D uTexture;
+			
+		varying vec2 vTextureCoord;
+		varying vec3 vNormal;
+		varying vec4 vPosition;
+			
+		void main() {	
+			const int MAX_DOTS = 100;
+			struct Dot {
+				vec2 center;
+				float radius;
+			} dot[MAX_DOTS];
+
+			float x = .05;
+			float y = .05;
+			for(int i = 0; i < 10; i++)
+			{
+				for(int j = 0; j < 10; j++)
+				{
+					dot[i * 10 + j] = Dot(vec2(x,y), .025);
+					y += .1;
+				}
+				x += .1;
+				y = .05;
+			}
+
+			vec4 tColor = texture2D(uTexture, vTextureCoord);
+			for (int i=0; i<MAX_DOTS; i++)
+			{
+				float dx = vTextureCoord.s - dot[i].center.x;
+				float dy = vTextureCoord.t - dot[i].center.y;
+				if (sqrt(dx*dx+dy*dy) < dot[i].radius){
+					tColor = vec4(1,1,1,1);
+					break;
+				}
+			}
+			gl_FragColor = tColor;
+		}			
+	</script>
+</head>
+<body onload="app.start()">
+	<h1>Christina Dickmann - ESA 9</h1>
+	<canvas id="canvas" width="1000" height="600"></canvas>
+	<div>
+	<strong>Farben:</strong> Geladen aus Textur</br>
+	<strong>Punkte:</strong> Prozedural generiert</br>
+	</br>
+	<strong>Kamerasteuerung:</strong></br>
+	<strong>Pfeiltasten links/rechts:</strong> Bewegen der Kamera auf einer Kreisbahn um die y-Achse</br>
+	<strong>Pfeiltasten oben/unten:</strong> Bewegen der Kamera um die x-Achse</br>
+	<strong>Taste R/Shift+R:</strong> Radius der Kreisbahn einstellen</br>
+	<strong>Tasten W/S:</strong> Bewegen der Kamera relativ zur y-Achse</br>
+	<strong>Tasten A/D:</strong> Bewegen der Kamera relativ zur x-Achse</br>
+	<strong>Taste O/F/P:</strong> Umschalten der Ansicht von orthogonal auf Frustum auf perspektivisch</br>
+	<strong>Taste V/Shift+V:</strong> Field of View in perspektivischer Ansicht einstellen</br>
+	<strong>Taste B/Shift+B:</strong> Near Plane bei Frustum einstellen</br>
+	</div>
+</body>
